@@ -1,0 +1,47 @@
+\section{Background -- Machine learning}
+\label{sec-background}
+Given a dataset $\mathcal{D}$, machine learning is concerned with finding (i.e. learning) the free parameters $\theta$ of a function $f_\theta$ that minimizes a \textbf{risk} $\mathcal{R}$:
+\[
+\min_\theta \mathcal{R}(\mathcal{D}, f_\theta).
+\]
+The typical setup in machine learning considers a dataset of tuple $(\bm x_i, y_i)\stackrel{\text{i.i.d.}}{\sim} \mathcal{D}$. That is, we sample a point $\bm x_i\in\mathcal{X}$, with $\mathcal{X}\subset\mathbb{R}^d$ and it's label $y_i\in\mathcal{Y}$ from a dataset $\mathcal{D}$. This setup is referred to as \textit{supervised} learning because each sample $\bm x$ has a label $y$ associated with it. This is the only setup that we will consider in this work. \textbf{i.i.d.} refers to the assumption we make that the data is independent and identically distributed in the dataset during training. This assumption is violated in the adversarial machine learning problem since an adversary can alter the data either during training or at test time (e.g. when using the model in production).
+
+Machine learning is concerned with learning the free-parameters of a function $f_\theta:\mathcal X\to \mathcal Y$ that minimizes a risk $\mathcal{R}$. If $\mathcal{Y}\subseteq\mathbb{R}$, the supervised problem is a \textbf{regression} and the risk is typically defined as the $l_2$ norm, yielding the following minimization problem:
+\[
+\min_\theta E_{(\bm x_i, y_i)\sim\mathcal{D}}||y_i - f_\theta(\bm{x_i})||^2_2.
+\]
+If $\mathcal Y\subset\mathbb{N}$, then the supervised problem is a $C$-categories \textbf{classification} problem. In this case, $y_i$ will usually be represented as a one-hot vector $\bm y_i=[v\in\{0, 1\}^{C}; v_j=1\text{ if } y_i=j\text{, } y_j=0\text{ otherwise}]$. In this case, the risk is usually defined as the \textbf{cross-entropy}, yielding the following minimization problem
+\[
+\min_\theta E_{(\bm x_i, \bm y_i)\sim\mathcal{D}}\sum_{j=1}^C y_{i,j}\log f_\theta(\bm x_i)_j,
+\]
+where the sum is taken over all the possible categories.
+
+The definition of the function $f$ itself as well as it's free parameters is an important consideration. For example, we may have guarantees for certain classes of function (e.g. linear or convex functions) but not for others. We refer to a \textbf{linear} function when $\theta=W\in\mathbb{R}^{d\times n}$ and the function $f$ is the dot product of the free-parameters $W$ and $\bm x$: 
+\[f_W(\bm x):= W^\top\bm x.\]
+
+An example of a non-linear function is the \textbf{multi-layer perceptron} where $f$ is taken to be a composition of linear and piece-wise non-linear functions $\sigma$
+\[
+f_\theta(\bm x) := \theta_L^\top\sigma(\theta_{L-1}^\top\sigma(...\sigma(\theta_1^\top\bm x))).
+\]
+We define the sequence $\theta:=(W_1, W_2,..., W_L)$ the parameters of the models.
+
+It is possible to constraint the solution by adding a smooth regularizer $\Omega$ to the objective function. The weight decays, which penalizes the L2 norm of the free parameters, is an example of a regularizer that is commonly use. This regularizer which penalizes the parameters for having a \textit{high} magnitude is defined as follows:
+\[
+\Omega(\theta) = ||\theta||^2_2.
+\]
+The regularizer can be added to the risk, yielding the following objective function:
+\[
+\mathcal{L}(\mathcal{D}, f_\theta) = \mathcal{R}(\mathcal{D}, f_\theta) + \lambda\Omega(\theta),
+\]
+where $\lambda>0$ is a hyper-parameter defining the magnitude of the regularizer. The objective function takes different names depending on the field of study. In some instance,s it is named the fitness function and, in others, the cost function. But, the objective is generally to find the optimum of this function through different optimization techniques.   
+The possible optimization apparatus depends on the definition of the function $f$ and the definition of the objective function. For example, in a regression problem with a linear function $f$, a closed-form solution that provides the global optimum exists:
+\[
+W = (X^\top X)^{-1}X^\top y.
+\]
+In general, such guarantees are not known. But given some broad assumptions, we can rely on greedy algorithms like \textbf{gradient descent/ascent} to find a local optimum. Gradient descent is defined as taking a \textit{step} in the direction of the biggest diminishing of the objective. This is akin to the free-parameters taking a best-response move to minimize the objective. Formally, the parameters $\theta^t$ at the step $t$ are defined as
+\[
+\theta^t := \theta^{t-1} - \alpha\nabla_{\theta^{t-1}}\{\mathcal{R}(\mathcal{D}, f_{\theta^{t-1}}) + \lambda\Omega(\theta^{t-1})\},
+\]
+with $\alpha>0$ the learning rate. The optimization ends when the parameters reach a local-minimum, that is, the objective function do not diminish anymore. The initial parameters $\theta^0$ are usually sampled according to a prior distribution. For non-convex functions, the initialization is an important factor that dictates the possible solutions that one may reach. 
+
+One can view this optimization procedure as a Potential game where each agent (the parameters) pick a best-response move until they reach the Nash equilibrium (the local-minimum). As we will see in more detail in the subsequent sections, we can view the problem of robust machine learning as a Game Design problem where the goal is to be robust to an adversary.
