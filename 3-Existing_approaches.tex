@@ -148,18 +148,38 @@ While this analytic formulation is very contrived, it is possible to use numeric
 
 
 \subsubsection{Bayesian game}
-So far, we assumed that each player had the knowledge about the other's player objective function. However, in practice, such an assumption may be hard to meet. For example, we may  not know that the objective of the adversary is to send spam related to a particular product, for example car insurances. In such a case, we want to relax the assumption that both players has knowledge about the other's objective and consider non-cooperative games with incomplete information. In this case, the uncertainty over the objective function of the other player is modeled using the Bayesian framework. This framework is usually referred as the Bayesian game~\cite{harsanyi_bayesian_games}.
+So far, we assumed that each player had the knowledge about the other player objective function.
+However, in practice, such an assumption may be hard to meet.
+For example, we may  not know that the objective of the adversary is to send spam related to a particular product, for example car insurances.
+In such a case, we want to relax the assumption that both players has knowledge about the other's objective and consider non-cooperative games with incomplete information.
+Instead, we consider that the players have \textit{beliefs} about the other players objective function. These beliefes are represented by a probability distribution and are updated using the Bayes rule.
+This framework is usually referred as the Bayesian game~\cite{harsanyi_bayesian_games}. A Bayesian game is similar to a Normal-form game, with the exception that each player can have a type $T_i$.
+The type of a player $i$ is sampled from a space $\mathcal{T}$, according to a probability distribution $p(\mathcal{T})$. The utility $u_i:A_i\times T_i\to\mathbb{R}$ maps from the product of the action of
+an agent $i$ and its type $T_i$ to a scalar.
 
-In the Bayesian game, we can assume that the cost $c$ is a random variable following some prior $q(c)$. For example, assume a learner that have incomplete information about the cost $c_a$ of the adversary. We can further assume that $g=\mathcal{G}(c_a)$ is not a function of $c_a$ for all practical purpose. We can now define an objective function that consider the uncertainty:
-\begin{equation}
-\label{eqn-bayesian_learner}
-    \min_f\int_{c_a}\mathcal{L}_f(\mathcal{D}, \mathcal{G}(c_a), f)dq(c_a).
-\end{equation}
-Assuming that the adversary have knowledge of the learners objective, we can define its objective
-\begin{equation}
-    \label{eqn-bayesian_adverary}
-    \min_g\mathcal{L}_g(\mathcal{D}, f, g).
-\end{equation}
-We define a Bayesian Equilibrium a $f$ and $\mathcal{G}(c_a)$ that satisfy Equation~\eqref{eqn-bayesian_learner} and Equation~\eqref{eqn-bayesian_adverary}~\cite{harsanyi_bayesian_games}. If $q$ is a Dirac distribution, we recover a Nash Equilibrium. We can now ask the usual question as to whether such an equilibrium may exists? Under which condition it exists? If fact, it can be shown that such an equilibrium exists if $f$ and $g$ are compact and convex~\cite{groshan_bayesian_reg}.
-
-The above results is concerned with Simultaneous Bayesian games. But what can we say about Stackelberg Bayesian games? Unsurprisingly, it is NP-hard in the general case for both Pure Nash Equilibrium and Mixed Nash Equilibrium~\cite{conitzer_bayesian_game}. 
+A Bayesian Nash equilibrium is also similar to the one of a Normal game, with the difference that a Bayesian Nash equilibrium is defined as a strategy profile that maximizes the expected utility of each player
+given their \textit{beliefs} $p(T_{-i}|T_i)$ of the other players type and given the stratgies played by the other players. In our adversarial machine learning setup, we represent the expected objective the learner $f$
+given a single adversary $g$ in a Bayesian game as follows
+\[
+     E\mathcal{L}_f(\mathcal{D}, f_\theta, g_\phi, T_f) = \sum_{T_g\in\mathcal{T}}p(T_g|T_f)\mathcal L_f(\mathcal{D}, f_{\theta}^{T_f}, g_{\phi}^{T_g}),
+\]
+and similarly for the adversary
+\[
+    E\mathcal{L}_g(\mathcal{D}, f_\theta, g_\phi, T_g) = \sum_{T_f\in\mathcal{T}}p(T_f|T_g)\mathcal L_g(\mathcal{D}, f_{\theta}^{T_f}, g_{\phi}^{T_g}).
+\]
+Given the above definition of expected utility, we can define Pure Nash equilibrium:
+\[
+    E\mathcal{L}_f(\mathcal{D}, f_{theta}, g_\phi, T_f) \leq E\mathcal{L}_f(\mathcal{D}, f_{\theta'}, g_{\phi}, T_f)~\forall~\theta',
+\]
+\[
+    E\mathcal{L}_g(\mathcal{D}, f_\theta, g_\phi, T_g) \leq E\mathcal{L}_g(\mathcal{D}, f_\theta, g_{\phi'}, T_f)~\forall~\phi'.
+\]
+If we had $p(T_f|T_g)$ and $p(T_g|T_f)$, computing the Nash equilibrium for Simulatenous and Stackelberg game is no different, with the exception
+of the sum over $\mathcal{T}$ which can be arbitrarily large. The issue arise if we do not have the beliefs. In such a case,
+we have to compute it using Bayes' theorem:
+\[
+    p(T_f|T_g) = \dfrac{p(T_g|T_f)p(T_f)}{p(T_g)}.
+\]
+In a realistic scenario, we may know not know the prior of a player, for example the adversary. In this case, we can compute it
+by marginalizing the joint distribution $p(T_g|T_f)p(T_f)$. But, the issue is that for an arbitrary distribution, such computation may be intractable.
+Therefore, method like sampling or variational approximation may be used.

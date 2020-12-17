@@ -5,4 +5,48 @@ We have seen that adversarial machine learning can be naturally considered in th
 \subsection{On modern machine learning and game theory}
 In opposition with the field of physics where we have many theoretical results but no empirical demonstration to back them up, machine learning is in the interesting situation where our theory does not explain our empirical results. Most of the theoretical guarantees in learning theory require convex functions, or at the minimum linear function. However, recent machine learning models have hundred of composed piece-wise non-linearities. In this setup, not only we do not have a convex function, but we also have a non-linear function.
 
-As we have seen during our review, Game Theory also rely on convex assumptions and linear functions. For this reason alone, all the results that we have seen do not readily transfer to modern machine learning. 
+As we have seen during our review, Game Theory also rely on convex assumptions and linear functions. Therefore, the equilibrium results that we have seen do not readily transfer to modern machine learning.
+Bridging the gap between the theoretical results and the empirical observation becomes increasingly important as we realize the potential of modern machine learning. For example,
+the latest language model called GPT-3 allow to generate sentences that are barely undistinguishable from a real human writer~\footnote{See for example this article from the Guardian written by a bot: \href{https://www.theguardian.com/commentisfree/2020/sep/08/robot-wrote-this-article-gpt-3}{https://www.theguardian.com/commentisfree/2020/sep/08/robot-wrote-this-article-gpt-3}}. Or, the latest
+image generation models allows to generate images that are also barely undistinguishable by humans~\footnote{See for example these images synthesized by a bot: \href{https://thispersondoesnotexist.com/}{https://thispersondoesnotexist.com/}}.
+These kind of models could be used to generate spams, or more realistically, generate fake news and fake twitter post to skew the public opinion and drive policy changes.
+In this case, the detection game becomes fuzzy. I would argue that a linear detector, which merely have the capacity to detect statistical occurence of different features (e.g. words or pixels),
+would not have the capacity to detect such an adversary. Would a non-linear model with theoretically infinite capacity be able to detect the adversary. This is less clear, but let's analyze the question anyway.
+First, let's ask if a Pure Nash equilibrium exists. If the adversary has distinguishable patterns in its data generation, then I would argue that a Pure Nash equilibrium does not exists.
+Since the adversary has distinguishable patterns in its generation, the learner could correlate the generated samples with the adversary.
+In such a case, the adversary would be better to change its parameters, yielding different distinguishable patterns for its generation. In turn,
+an optimal classifier for detecting these new distinguishable patterns would be different. Assuming that there were two set of parameters that both
+the adversary and the classifier can have, this setup is akin to the matching penny game which does not have a Pure Nash equilibrium.
+However, a Mixed Nash equilibrium exists. What would such an equilibrium entail? That the learner detects the adversary
+half of the time? This is a more expensive version of throwing a 2-sided coin and predicting that the data is from an adversary if the coin yield tail.
+Alternatively, we could provide the classifier with more information. For example, in spam detection, the domain name from which the email is sent
+is factored into the decision. The consequence is that your email is more likely to be categorized as spam if you use your own domain name rather than a domain
+from a trusted source such as gmail. The consequences are similar but perhaps more problematic when we consider allowing only trusted sources to publish news
+or to be recommended. In this case, the central entity taking the decision is akin of a dictator that can maximize its utility regardless of what the utilities
+of the other players are. This entity can control de narrative by allowing only the source of information that may increase the chance to sway the public
+opinion in the direction that may favorise its utility.
+
+This demonstrate that the problem of adversarial machine learning will become increasingly important. I argued that we
+cannot rely on the current mechanistic design for solving this problem, suggesting that more work at the intersection
+of game theory and adversarial machine learning is needed to provide mechanistic design that enable a system that maximizes
+the utility of its constituent.
+
+\subsection{On out-of-distribution generalization and game theory}
+There is as much incentives, if not more, to have algorithms that are robust to shift in distributions caused by factors that are not
+related to an adversary, but rather the consequence of natural causes. Some works started to investigate the idea of using
+game theory to analyze the question of out-of-distribution generalization and propose frameworks for learning in this settings~\cite{ahuja2020invariant,ahuja2020linear}.
+In their work, they aim at finding a classifier that is invariant to changes in the distribution of their data. They assume that the change in distribution is generated
+by a random variable that is independant of the variable deciding for the underlying category of the sample.
+They frame their problem as a game where each of each realization of a change in distribution is defined as an environment. For each environment, they define
+a mapping from a set of features to a prediction. Given these mapping, their objective is to learn an embedding from the data to a feature space that is
+invariant of the spurious feature of each environment. Finally, they demonstrate, under a set of assumptions, that at a Nash Equilibriumm, the learned feature space is invariant
+to the spurious correlation of each environments. Their setup is essentially the same as a Stackelberg game where each mapping is learned in the inner optimization and the
+mapping from the data space to the invariant feature space is learned in the outer loop.
+
+I believe that the idea of relating equilibriums to emerging phenomenon, such as invariance, is an interesting direction in itself.
+In nature, structure emerge in dynamical systems at their equilibrium. For example, in a market where each individual player aim at maximizing their own utility,
+coalitions of players may emerge naturally. But, more generally, the formation of coalitions (or communities) is a well known phenomenom in network science and is related
+to other phenomena such as the small-world network effect~\cite{Watts1998Collective}.
+Like I claimed in Section~\ref{sec-background}, the parameters of a model are akin of agents taking a step in the direction that maximally
+diminish the loss. As a future work, I think that investigating more the emergence of modularity or the coalition of parameters at equilibrium
+and its effect on the robustness of the model could be an interesting direction.
